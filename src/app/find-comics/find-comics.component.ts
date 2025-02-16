@@ -1,20 +1,21 @@
-import { Component, OnInit, Signal, viewChild, ViewContainerRef, WritableSignal, ComponentRef, Injectable } from '@angular/core';
+import { Component, OnInit, Signal, viewChild, ViewContainerRef, WritableSignal, ComponentRef, Injectable, ViewChild } from '@angular/core';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import {signal} from '@angular/core';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { FindComicRowComponent } from '../find-comic-row/find-comic-row.component';
 
 @Component({
   selector: 'app-find-comics',
-  imports: [NgbDropdownModule, FormsModule],
+  imports: [NgbDropdownModule, FormsModule, FindComicRowComponent],
   templateUrl: './find-comics.component.html',
   styleUrl: './find-comics.component.css'
 })
 
 @Injectable({providedIn: 'root'})
-export class FindComicsComponent implements OnInit {
+export class FindComicsComponent {
 
   comicQuery = '';
   curDropdownSelection : WritableSignal<number> = signal(0);
@@ -22,8 +23,21 @@ export class FindComicsComponent implements OnInit {
   constructor(private http: HttpClient){}
 
   vcr = viewChild('container', {read: ViewContainerRef});
+  rowVcr = viewChild('comicRowContainer', {read: ViewContainerRef});
+
   #filterDropdownRef?: ComponentRef<DropdownComponent>;
   #sortDropdownRef?: ComponentRef<DropdownComponent>;
+  #comicRowRef?: ComponentRef<FindComicRowComponent>;
+
+  ngAfterViewInit(): void {
+
+    this.#filterDropdownRef = this.vcr()?.createComponent(DropdownComponent);
+    this.setupDropdownComponent(this.#filterDropdownRef, ['Volume', 'Issue'], "Search By");
+
+    this.#sortDropdownRef = this.vcr()?.createComponent(DropdownComponent);
+    this.setupDropdownComponent(this.#sortDropdownRef, ['Name', 'Date'], "Sort Results By");
+      
+  }
 
   setupDropdownComponent(ref : ComponentRef<DropdownComponent> | undefined, dropdownItems : string[], caption : string)
   {
@@ -31,6 +45,7 @@ export class FindComicsComponent implements OnInit {
     ref?.setInput('caption', caption);
     
   }
+
  
   onClickDropdownItem(index :number) : void
   {
@@ -56,25 +71,47 @@ export class FindComicsComponent implements OnInit {
       }
     }
     
-    let apiFullUrl:string = `/api/${resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=25&sort=${sort}:desc`;
+    // build API string
+    let apiFullUrl:string = `/api/${resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=25&sort=${sort}:asc`;
 
-
-    this.http.get(`${apiFullUrl}`, {
-      
-    }).subscribe( data => {
-      console.log(data);
-    })
+    //query the api
+    this.http.get<any>(`${apiFullUrl}`, {
+      responseType: 'json',
+      observe: 'response'
+    }).pipe().subscribe( res  => {
+      this.createAllComicRows(res.body!);
+    });
+  }
+  
+  createAllComicRows(data : any) : void
+  {
+    //let result = JSON.parse(data);
+    let results = data['results'];
+    console.log(results);
+    for(let i = 0; i < results.length; i++)
+    {
+      this.createComicRow(results[i]);
+    }
   }
 
-  ngOnInit(): void {
+  createComicRow(row : any)
+  {
+    
+    let name : string = row['name'];
+    let desc:string = row['description'];
+    let imgUrl:string = row['image']['small_url'];
+    let ref = this.rowVcr()?.createComponent(FindComicRowComponent)
 
-      this.#filterDropdownRef = this.vcr()?.createComponent(DropdownComponent);
-      this.setupDropdownComponent(this.#filterDropdownRef, ['Volume', 'Issue'], "Search By");
+    ref?.setInput('name', name);
+    ref?.setInput('desc', desc);
+    ref?.setInput('imgUrl', imgUrl);
+    ref?.setInput('type', this.#filterDropdownRef?.instance.getCurrentDropdownString());
+    
 
-      this.#sortDropdownRef = this.vcr()?.createComponent(DropdownComponent);
-      this.setupDropdownComponent(this.#sortDropdownRef, ['Name', 'Date'], "Sort Results By");
-      
   }
+
+
+
 
 }
 
