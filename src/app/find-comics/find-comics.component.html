@@ -1,16 +1,30 @@
 
 <div class="container">
 
-    <div class="row">
-        <input type="text" class="form-control" placeholder="Search for a comic book" [(ngModel)]="comicQuery">
-        <div>
-            <ng-container #container>
+    <div class="row align-items-end m-3">
+        <div class="col">
+            <p class="m-0">Keywords</p>
+            <input type="text" class="form-control" placeholder="e.g. Batman" [(ngModel)]="comicQuery">
 
-            </ng-container>
-            <div></div>
-            <button type="button" (click)="getData()" class="btn btn-primary">Query API</button>
-
-            <ng-template #comicRowContainer></ng-template>
         </div>
+        
+        <div class="col-2">
+            <ng-template #filterContainer>
+            
+            </ng-template>
+        </div>
+        <div class="col-2 me-0">
+            <ng-template #sortContainer>
+            
+            </ng-template>
+        </div>
+
+        <div class="col-3">
+            <button type="button" (click)="getData()" class="btn btn-primary h-25">Search!</button>
+
+        </div>
+
     </div>
+    <ng-template #comicRowContainer></ng-template>
+
 </div>

@@ -10,7 +10,7 @@ import { FindComicRowComponent } from '../find-comic-row/find-comic-row.componen
 
 @Component({
   selector: 'app-find-comics',
-  imports: [NgbDropdownModule, FormsModule, FindComicRowComponent],
+  imports: [NgbDropdownModule, FormsModule, FindComicRowComponent, DropdownComponent],
   templateUrl: './find-comics.component.html',
   styleUrl: './find-comics.component.css'
 })
@@ -23,20 +23,23 @@ export class FindComicsComponent {
 
   constructor(private http: HttpClient){}
 
-  vcr = viewChild('container', {read: ViewContainerRef});
+  filterVcr = viewChild('filterContainer', {read: ViewContainerRef});
+  sortVcr = viewChild('sortContainer', {read: ViewContainerRef});
   rowVcr = viewChild('comicRowContainer', {read: ViewContainerRef});
 
   #filterDropdownRef?: ComponentRef<DropdownComponent>;
   #sortDropdownRef?: ComponentRef<DropdownComponent>;
   #comicRowRef?: ComponentRef<FindComicRowComponent>;
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
 
-    this.#filterDropdownRef = this.vcr()?.createComponent(DropdownComponent);
+    this.filterVcr()?.clear();
+    this.sortVcr()?.clear();
+    this.#filterDropdownRef = this.filterVcr()?.createComponent(DropdownComponent);
     this.setupDropdownComponent(this.#filterDropdownRef, ['Volume', 'Issue'], "Search By");
 
-    this.#sortDropdownRef = this.vcr()?.createComponent(DropdownComponent);
-    this.setupDropdownComponent(this.#sortDropdownRef, ['Name', 'Date'], "Sort Results By");
+    this.#sortDropdownRef = this.sortVcr()?.createComponent(DropdownComponent);
+    this.setupDropdownComponent(this.#sortDropdownRef, ['Name', 'Date'], "Sort By");
       
   }
 
