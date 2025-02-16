@@ -7,6 +7,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { FindComicRowComponent } from '../find-comic-row/find-comic-row.component';
 
+
 @Component({
   selector: 'app-find-comics',
   imports: [NgbDropdownModule, FormsModule, FindComicRowComponent],
@@ -85,6 +86,7 @@ export class FindComicsComponent {
   
   createAllComicRows(data : any) : void
   {
+    this.rowVcr()?.clear();
     //let result = JSON.parse(data);
     let results = data['results'];
     console.log(results);
