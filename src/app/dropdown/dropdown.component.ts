@@ -18,4 +18,8 @@ export class DropdownComponent {
   {
     this.curDropdownSelection.set(index);
   }
+
+  getCurrentDropdownString() : string{
+    return this.dropdownList()[this.curDropdownSelection()];
+  }
 }

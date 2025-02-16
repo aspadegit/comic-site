@@ -1,15 +1,14 @@
-import { Component, OnInit, Signal, viewChild, ViewContainerRef, WritableSignal, ComponentRef } from '@angular/core';
+import { Component, OnInit, Signal, viewChild, ViewContainerRef, WritableSignal, ComponentRef, Injectable } from '@angular/core';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import {signal} from '@angular/core';
 import { DropdownComponent } from '../dropdown/dropdown.component';
-import { inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-find-comics',
-  imports: [NgbDropdownModule],
+  imports: [NgbDropdownModule, FormsModule],
   templateUrl: './find-comics.component.html',
   styleUrl: './find-comics.component.css'
 })
@@ -17,6 +16,7 @@ import { Injectable } from '@angular/core';
 @Injectable({providedIn: 'root'})
 export class FindComicsComponent implements OnInit {
 
+  comicQuery = '';
   curDropdownSelection : WritableSignal<number> = signal(0);
 
   constructor(private http: HttpClient){}
@@ -39,12 +39,28 @@ export class FindComicsComponent implements OnInit {
 
   getData() : void
   {
-    let apiFullUrl:string = "/api/";
-    apiFullUrl = apiFullUrl.concat("search/?api_key=");
-    apiFullUrl = apiFullUrl.concat(environment.apiKey);
-    apiFullUrl = apiFullUrl.concat("&format=json&resources=volume&query=Transformers")
+    //grab the selections from the dropdowns
+    let resource = this.#filterDropdownRef?.instance.getCurrentDropdownString().toLowerCase();
+    let sort = this.#sortDropdownRef?.instance.getCurrentDropdownString().toLowerCase();
+
+    //volume & issue have different fields for date
+    if(sort == 'date')
+    {
+      if(resource == 'volume')
+      {
+        sort = 'start_year'
+      }
+      else
+      {
+        sort = 'cover_date';
+      }
+    }
+    
+    let apiFullUrl:string = `/api/${resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=25&sort=${sort}:desc`;
+
+
     this.http.get(`${apiFullUrl}`, {
-   
+      
     }).subscribe( data => {
       console.log(data);
     })
@@ -53,12 +69,11 @@ export class FindComicsComponent implements OnInit {
   ngOnInit(): void {
 
       this.#filterDropdownRef = this.vcr()?.createComponent(DropdownComponent);
-      this.setupDropdownComponent(this.#filterDropdownRef, ['Name', 'Publisher'], "Search By");
+      this.setupDropdownComponent(this.#filterDropdownRef, ['Volume', 'Issue'], "Search By");
 
       this.#sortDropdownRef = this.vcr()?.createComponent(DropdownComponent);
-      this.setupDropdownComponent(this.#sortDropdownRef, ['Name', 'Publisher', 'Date'], "Sort Results By");
+      this.setupDropdownComponent(this.#sortDropdownRef, ['Name', 'Date'], "Sort Results By");
       
-      console.log("api url " + environment.apiUrl);
   }
 
 }
