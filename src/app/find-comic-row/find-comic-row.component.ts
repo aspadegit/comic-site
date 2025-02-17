@@ -18,8 +18,8 @@ export class FindComicRowComponent {
   imgUrl = input("https://comicvine.gamespot.com/a/uploads/scale_small/6/67663/4245087-01.jpg");
   desc = input('Description');
 
+  constructor(private comicService : ComicServiceService) {};
 
-  service = inject(ComicServiceService);
 
   addComic() : void
   {
@@ -36,7 +36,7 @@ export class FindComicRowComponent {
 
     }
     
-    this.service.addComic(newComic);
+    this.comicService.addComic(newComic);
   }
 }
 

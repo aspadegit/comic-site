@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MyComicRowComponent } from "../my-comic-row/my-comic-row.component";
+import { ComicServiceService } from '../comic-service.service';
 
 @Component({
   selector: 'app-view-comics',
@@ -9,4 +10,11 @@ import { MyComicRowComponent } from "../my-comic-row/my-comic-row.component";
 })
 export class ViewComicsComponent {
 
+  constructor(private comicService : ComicServiceService) {};
+  
+  ngAfterViewInit() : void
+  {
+
+    console.log("view comics is getting",this.comicService.getComics());
+  }
 }

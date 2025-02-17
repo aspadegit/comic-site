@@ -31,7 +31,7 @@ export class FindComicsComponent {
   #filterDropdownRef?: ComponentRef<DropdownComponent>;
   #sortDropdownRef?: ComponentRef<DropdownComponent>;
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
 
     this.filterVcr()?.clear();
     this.sortVcr()?.clear();

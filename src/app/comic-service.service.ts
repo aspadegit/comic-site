@@ -5,23 +5,29 @@ import { Dictionary } from './comic'; // not a true Dictionary; just for returni
 @Injectable({
   providedIn: 'root'
 })
+
+//NOTE: CURRENTLY USING SESSION STORAGE (clears on browser close)
+  // may want to use localStorage (saves until cache is clear)
+  // may want to implement a back-end
 export class ComicServiceService {
 
-  comicDict : Dictionary<Comic>;
+  private comicDict : Dictionary<Comic>;
 
   constructor() {
-    this.comicDict = {};
+    this.comicDict = JSON.parse(sessionStorage.getItem('comics')!);
    }
 
   getComics() : Dictionary<Comic>
   {
-    return this.comicDict;
+    return JSON.parse(sessionStorage.getItem('comics')!);
   }
 
   addComic(c : Comic) : void
   {
-    console.log(this.comicDict);
+    console.log("added comic", c);
     this.comicDict[c.id] = c;
+    sessionStorage.setItem('comics', JSON.stringify(this.comicDict));
+    console.log("after adding, comicDict is now ", this.comicDict);
   }
 
   //returns success/unsuccess
