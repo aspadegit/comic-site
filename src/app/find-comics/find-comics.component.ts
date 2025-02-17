@@ -6,11 +6,12 @@ import { environment } from '../../environments/environment';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { FindComicRowComponent } from '../find-comic-row/find-comic-row.component';
+import { Comic, ComicJson, Dictionary } from '../comic'
 
 
 @Component({
   selector: 'app-find-comics',
-  imports: [NgbDropdownModule, FormsModule, FindComicRowComponent, DropdownComponent],
+  imports: [NgbDropdownModule, FormsModule],
   templateUrl: './find-comics.component.html',
   styleUrl: './find-comics.component.css'
 })
@@ -29,7 +30,6 @@ export class FindComicsComponent {
 
   #filterDropdownRef?: ComponentRef<DropdownComponent>;
   #sortDropdownRef?: ComponentRef<DropdownComponent>;
-  #comicRowRef?: ComponentRef<FindComicRowComponent>;
 
   ngOnInit(): void {
 
@@ -62,54 +62,49 @@ export class FindComicsComponent {
     let resource = this.#filterDropdownRef?.instance.getCurrentDropdownString().toLowerCase();
     let sort = this.#sortDropdownRef?.instance.getCurrentDropdownString().toLowerCase();
 
+    let date_style = (resource == 'volume')? 'start_year' : 'cover_date';
     //volume & issue have different fields for date
     if(sort == 'date')
     {
-      if(resource == 'volume')
-      {
-        sort = 'start_year'
-      }
-      else
-      {
-        sort = 'cover_date';
-      }
+      sort = date_style;
     }
     
     // build API string
     let apiFullUrl:string = `/api/${resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=25&sort=${sort}:asc`;
 
     //query the api
-    this.http.get<any>(`${apiFullUrl}`, {
+    this.http.get<ComicJson>(`${apiFullUrl}`, {
       responseType: 'json',
       observe: 'response'
     }).pipe().subscribe( res  => {
-      this.createAllComicRows(res.body!);
+      this.createAllComicRows(res.body!, resource!, date_style);
     });
   }
   
-  createAllComicRows(data : any) : void
+  createAllComicRows(data : ComicJson, type : string, date_style: string) : void
   {
+    // clear the rows
     this.rowVcr()?.clear();
-    //let result = JSON.parse(data);
-    let results = data['results'];
-    console.log(results);
+    let results = data.results;
+    console.log(data.results);
+
+    // loop through & instantiate new result rows
     for(let i = 0; i < results.length; i++)
     {
-      this.createComicRow(results[i]);
+      this.createComicRow(results[i], type, date_style);
     }
   }
 
-  createComicRow(row : any)
+  createComicRow(row : any, _type :string, date_style: string)
   {
-    
-    let name : string = row['name'];
-    let desc:string = row['description'];
-    let imgUrl:string = row['image']['small_url'];
+ 
     let ref = this.rowVcr()?.createComponent(FindComicRowComponent)
 
-    ref?.setInput('name', name);
-    ref?.setInput('desc', desc);
-    ref?.setInput('imgUrl', imgUrl);
+    ref?.setInput('id', row['id']);
+    ref?.setInput('name', row['name']);
+    ref?.setInput('desc', row['description']);
+    ref?.setInput('date', row[date_style]);
+    ref?.setInput('imgUrl', row['image']['small_url']);
     ref?.setInput('type', this.#filterDropdownRef?.instance.getCurrentDropdownString());
     
 

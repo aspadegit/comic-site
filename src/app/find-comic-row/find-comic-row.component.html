@@ -13,10 +13,18 @@
                     <p class="col ps-0">{{type()}}</p>
             </div>
             <div class="row">
+                    <b class="col-1">Released:</b>
+                    <p class="col ps-3">{{date()}}</p>
+            </div>
+            <div class="row">
                 <b class="col">About:</b>
                 <div class="row ps-4">
                     <div [innerHTML]="desc()"></div>
     
+            </div>
+            <div class="row-5 align-items-end ps-4">
+                <button ngbDropdownItem class="btn btn-primary" (click)="addComic()">Add to My List</button>              
+
             </div>
 
             </div>
