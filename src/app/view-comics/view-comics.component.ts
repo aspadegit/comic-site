@@ -32,6 +32,11 @@ export class ViewComicsComponent {
       let ref = this.rowVcr()?.createComponent(MyComicRowComponent);
       ref?.setInput('comicId', key);
       ref?.instance.setUpComic();
+
+      // destroy the row when it receives the emitted "delete" function
+      ref?.instance.delete.subscribe(() => {
+        ref?.destroy();
+      });
     }
   }
 

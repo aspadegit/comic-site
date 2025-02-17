@@ -48,6 +48,7 @@ export class ComicServiceService {
     if(id in this.comicDict)
     {
       delete this.comicDict[id];
+      this.setComicsToStorage();
       return true;
     }
     return false;
