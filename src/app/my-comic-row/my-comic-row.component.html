@@ -1,0 +1,97 @@
+<div class = "row border p-2 pt-3 pb-3">
+        
+    <div class="col-2">
+        <img class="w-100" src="" alt="Comic Image">
+    </div>
+    
+    <div class="col ps-4">
+        <h3 class="row">Name</h3>
+
+        <!--Collapsable Info Section-->
+        <div class="row">
+                
+                <!--Collapse Button-->
+                <div>
+                    <button
+                    type="button"
+                    class="btn mx-0"
+                    (click)="isCollapsed = !isCollapsed"
+                    [attr.aria-expanded]="!isCollapsed"
+                    aria-controls="collapseExample">
+                    @if(isCollapsed)
+                    {
+                        <i class="caret bi bi-caret-right-fill"></i> In-Depth Info
+
+                    }
+                    @else {
+                        <i class="caret bi bi-caret-down-fill"></i> In-Depth Info
+                    }
+                    </button>
+                </div>
+                
+        
+                <!--Info section-->
+                <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
+                    
+                <div class="row">
+                    <b class="col-1">Type:</b>
+                    <p class="col ps-0">t</p>
+                </div>
+                <div class="row">
+                        <b class="col-1">Released:</b>
+                        <p class="col ps-3">date</p>
+                </div>
+                <div class="row">
+                    <b class="col">About:</b>
+                    <div class="row ps-4">
+                        <div [innerHTML]=""></div>
+
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+
+        <!--User rating section-->
+
+        <!--Owned?-->
+        <label for="ownedForm"><h6>Owned:</h6></label>
+        <div id="ownedForm" class="form-check">
+            
+            <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+            <label class="form-check-label" for="defaultCheck1">
+              Physical
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="defaultCheck2">
+            <label class="form-check-label" for="defaultCheck2">
+              Digital
+            </label>
+          </div>
+
+          <!--Star rating-->
+          <div class="row">
+            <div>
+                <label class="mt-3"for="stars"><h6>Rating:</h6></label>
+                <br>
+                <ngb-rating id="stars" [(rate)]="rating">
+                  <ng-template let-fill="fill" let-index="index">
+                      <i class="star bi-star{{ fill === 100 ? '-fill' : '' }}" [class.filled]="fill === 100"></i>
+                  </ng-template>
+              </ngb-rating>
+            </div>
+            
+          <p>Rate: <b>{{rating}}</b></p>
+          
+          </div>
+
+          <div class="col mt-2">
+            <label for="userNotesInput"><h6>Notes:</h6></label>
+            <input id="userNotesInput" type="text" class="form-control" placeholder="Write any additional notes here." [(ngModel)]="userNotes">
+
+        </div>
+         
+        
+    </div>
+</div>
