@@ -28,6 +28,12 @@ export class ComicServiceService {
     return this.getComicsFromStorage();
   }
 
+  getComic(id : number) : Comic | null
+  {
+    return this.comicDict[id];
+    
+  }
+
   addComic(c : Comic) : void
   {
     console.log("added comic", c);
@@ -61,6 +67,12 @@ export class ComicServiceService {
       }
     }
     return false;
+  }
+
+  updateComic(comicId : number, newComic : Comic)
+  {
+    this.comicDict[comicId] = newComic;
+    this.setComicsToStorage();
   }
 
 

@@ -12,6 +12,7 @@ export interface Comic {
     userRating: number;
     userDetails: string;
     image: string;
+    owned: boolean[];
 
 }
 export type Dictionary<Comic> = {

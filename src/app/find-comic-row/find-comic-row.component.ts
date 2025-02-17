@@ -32,8 +32,8 @@ export class FindComicRowComponent {
       type: this.type(),
       userRating: -1,
       userDetails: '',
-      date: this.date()
-
+      date: this.date(),
+      owned: [false, false]
     }
     
     this.comicService.addComic(newComic);
