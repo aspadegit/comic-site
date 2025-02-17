@@ -1,32 +1,38 @@
 import { Injectable } from '@angular/core';
 import { Comic } from './comic';
 import { Dictionary } from './comic'; // not a true Dictionary; just for returning type <int, Comic>
+import { inject } from '@angular/core';
+import { LOCAL_STORAGE } from './tokens';
+import { relative } from 'path/posix';
 
 @Injectable({
   providedIn: 'root'
 })
 
-//NOTE: CURRENTLY USING SESSION STORAGE (clears on browser close)
+//NOTE: CURRENTLY USING SESSION STORAGE (clears on browser close) (in app.config.ts)
   // may want to use localStorage (saves until cache is clear)
   // may want to implement a back-end
 export class ComicServiceService {
 
   private comicDict : Dictionary<Comic>;
+  private storage = inject(LOCAL_STORAGE);
 
   constructor() {
-    this.comicDict = JSON.parse(sessionStorage.getItem('comics')!);
+    
+    this.comicDict = this.getComicsFromStorage();
+    
    }
 
   getComics() : Dictionary<Comic>
   {
-    return JSON.parse(sessionStorage.getItem('comics')!);
+    return this.getComicsFromStorage();
   }
 
   addComic(c : Comic) : void
   {
     console.log("added comic", c);
     this.comicDict[c.id] = c;
-    sessionStorage.setItem('comics', JSON.stringify(this.comicDict));
+    this.setComicsToStorage();
     console.log("after adding, comicDict is now ", this.comicDict);
   }
 
@@ -57,6 +63,41 @@ export class ComicServiceService {
     return false;
   }
 
-  
+
+  private setComicsToStorage() : void
+  {
+    try {
+      this.storage.setItem('comics', JSON.stringify(this.comicDict));
+
+    }
+    catch(e)
+    {
+      console.log(e);
+    }
+  }
+  private getComicsFromStorage() : Dictionary<Comic>
+  {
+    let returnValue : Dictionary<Comic> = {};
+
+    try
+    {
+      let json:string | null = this.storage.getItem('comics');
+
+      if(json != null)
+        returnValue = JSON.parse(json);
+    
+    }
+    catch(e)
+    {
+      console.log(e);
+    }
+    finally
+    {
+      if(returnValue == null)
+        returnValue = {};
+
+      return returnValue;
+    }
+  }
   
 }
