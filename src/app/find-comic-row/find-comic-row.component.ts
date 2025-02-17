@@ -3,6 +3,7 @@ import { input, InputSignal } from '@angular/core';
 import { Comic } from '../comic';
 import { ComicServiceService } from '../comic-service.service';
 
+
 @Component({
   selector: 'app-find-comic-row',
   imports: [],
@@ -18,8 +19,17 @@ export class FindComicRowComponent {
   imgUrl = input("https://comicvine.gamespot.com/a/uploads/scale_small/6/67663/4245087-01.jpg");
   desc = input('Description');
 
+  isInList : boolean = false;
+
   constructor(private comicService : ComicServiceService) {};
 
+  ngOnInit()
+  {
+    if(this.comicService.getComic(this.id()) != null)
+    {
+      this.isInList = true;
+    }
+  }
 
   addComic() : void
   {
@@ -37,6 +47,8 @@ export class FindComicRowComponent {
     }
     
     this.comicService.addComic(newComic);
+    this.isInList = true;
   }
+
 }
 

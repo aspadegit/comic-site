@@ -4,7 +4,7 @@ import { ComicServiceService } from '../comic-service.service';
 
 @Component({
   selector: 'app-view-comics',
-  imports: [MyComicRowComponent],
+  imports: [],
   templateUrl: './view-comics.component.html',
   styleUrl: './view-comics.component.css'
 })

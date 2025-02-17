@@ -23,8 +23,9 @@
     
             </div>
             <div class="row-5 align-items-end ps-4">
-                <button ngbDropdownItem class="btn btn-primary" (click)="addComic()">Add to My List</button>              
-
+    
+                <button ngbDropdownItem class="btn btn-primary" (click)="addComic()" [disabled]="isInList">Add to My List</button>              
+            
             </div>
 
             </div>
