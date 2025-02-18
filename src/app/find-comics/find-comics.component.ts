@@ -1,17 +1,18 @@
-import { Component, OnInit, Signal, viewChild, ViewContainerRef, WritableSignal, ComponentRef, Injectable, ViewChild } from '@angular/core';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { Component, OnInit, Signal, viewChild, ViewContainerRef, WritableSignal, ComponentRef, Injectable, ViewChild, ElementRef } from '@angular/core';
+import { NgbDropdownModule, NgbPagination, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import {signal} from '@angular/core';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { FindComicRowComponent } from '../find-comic-row/find-comic-row.component';
-import { Comic, ComicJson, Dictionary } from '../comic'
+import { Comic, ComicJson, Dictionary, QueryInfo } from '../comic'
+import { PaginationComponent } from '../pagination/pagination.component';
 
 
 @Component({
   selector: 'app-find-comics',
-  imports: [NgbDropdownModule, FormsModule],
+  imports: [NgbDropdownModule, FormsModule, NgbPaginationModule],
   templateUrl: './find-comics.component.html',
   styleUrl: './find-comics.component.css'
 })
@@ -21,9 +22,22 @@ export class FindComicsComponent {
 
   comicQuery = '';
   curDropdownSelection : WritableSignal<number> = signal(0);
+  
+  // for pagination
+  page : number = 1;
+  currentResults : number[] = [];
+
+  // changingOffset: changes around. initially is what is used to query the database, then is adjusted when pages change
+  //queryInfo offset: the lower-bound offset used to query the database
+  //cache offset: the offset returned in the HTTP response. does not change until a new query
+  cache : ComicJson = {results: [], offset:0, number_of_total_results: 0};
+  changingOffset: number = 0;
+  queryInfo : QueryInfo = { limit: 20, resource: 'volume', sort: 'name', sortDirection: 'asc', dateStyle: 'start_year', offset:0 };
+  queryNum : number = this.queryInfo.limit*5;
 
   constructor(private http: HttpClient){}
 
+  // view container refs
   filterVcr = viewChild('filterContainer', {read: ViewContainerRef});
   sortVcr = viewChild('sortContainer', {read: ViewContainerRef});
   rowVcr = viewChild('comicRowContainer', {read: ViewContainerRef});
@@ -40,7 +54,7 @@ export class FindComicsComponent {
 
     this.#sortDropdownRef = this.sortVcr()?.createComponent(DropdownComponent);
     this.setupDropdownComponent(this.#sortDropdownRef, ['Name', 'Date'], "Sort By");
-      
+    
   }
 
   setupDropdownComponent(ref : ComponentRef<DropdownComponent> | undefined, dropdownItems : string[], caption : string)
@@ -58,44 +72,124 @@ export class FindComicsComponent {
 
   getData() : void
   {
+    
     //grab the selections from the dropdowns
-    let resource = this.#filterDropdownRef?.instance.getCurrentDropdownString().toLowerCase();
-    let sort = this.#sortDropdownRef?.instance.getCurrentDropdownString().toLowerCase();
+    this.queryInfo.resource = this.#filterDropdownRef?.instance.getCurrentDropdownString().toLowerCase()!;
+    this.queryInfo.sort = this.#sortDropdownRef?.instance.getCurrentDropdownString().toLowerCase()!;
 
-    let date_style = (resource == 'volume')? 'start_year' : 'cover_date';
+    this.queryInfo.dateStyle = (this.queryInfo.resource == 'volume')? 'start_year' : 'cover_date';
     //volume & issue have different fields for date
-    if(sort == 'date')
+    if(this.queryInfo.sort == 'date')
     {
-      sort = date_style;
+      this.queryInfo.sort = this.queryInfo.dateStyle;
     }
     
     // build API string
-    let apiFullUrl:string = `/api/${resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=25&sort=${sort}:asc`;
+    let apiFullUrl:string = `/api/${this.queryInfo.resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=${this.queryNum}&offset=${this.queryInfo.offset}&sort=${this.queryInfo.sort}:${this.queryInfo.sortDirection}`;
 
     //query the api
     this.http.get<ComicJson>(`${apiFullUrl}`, {
       responseType: 'json',
       observe: 'response'
     }).pipe().subscribe( res  => {
-      this.createAllComicRows(res.body!, resource!, date_style);
+      console.log(res);
+      this.cache = res.body!;
+      this.createAllComicRows();
     });
   }
   
-  createAllComicRows(data : ComicJson, type : string, date_style: string) : void
+  createAllComicRows() : void
   {
+    console.log(this.cache);
+    let data = this.cache;
+
     // clear the rows
+    this.currentResults = [];
     this.rowVcr()?.clear();
+
+    //get the data
     let results = data.results;
     console.log(data.results);
 
+    // top pagination
+    this.setupPagination();
+
     // loop through & instantiate new result rows
-    for(let i = 0; i < results.length; i++)
+    let rowArrayOffset = (this.changingOffset - this.cache.offset); // ensures that i stays [0, 100)
+    let numRows = Math.min(this.queryInfo.limit + rowArrayOffset, results.length); //calculates the upper bound for the 20 rows visible
+    for(let i = rowArrayOffset; i < numRows; i++)
     {
-      this.createComicRow(results[i], type, date_style);
+      this.createComicRow(results[i]);
     }
+
+    // bottom pagination
+    this.setupPagination();
   }
 
-  createComicRow(row : any, _type :string, date_style: string)
+
+
+  setupPagination() : void
+  {
+    let ref = this.rowVcr()?.createComponent(PaginationComponent);
+
+    ref?.instance.setup(this.page, this.queryInfo.limit, this.cache);
+
+    ref?.instance.updatePage.subscribe( eventData => {
+      let shouldRequery : boolean = eventData[0];
+      let newPage: number = eventData[1];
+
+      // makes sure offset is pos / negative correctly
+      let pageDiff = newPage - this.page;
+      let newOffset : number = this.changingOffset + (this.queryInfo.limit * pageDiff);
+
+      console.log("new Page: " + newPage);
+      console.log("new offset: " + newOffset);
+
+      // clamp upper bound
+      if(newOffset > this.cache.number_of_total_results)
+      {
+        newOffset = this.cache.number_of_total_results;
+      }
+      
+      //clamp lower bound
+      if(newOffset < 0)
+      {
+        newOffset = 0;
+      }
+
+      this.changingOffset = newOffset;
+      this.page = newPage;
+
+      //query
+      if(shouldRequery)
+      {
+        //ensure query offset is a multiple of 100 (so cache has the correct number of results)
+          //edge case of querying a new page that is not a multiple of 5 (e.g going from page 1 to page 23 without this would not start at the correct offset)
+        if(newOffset % this.queryNum != 0)
+        {
+          let remainder = newOffset % this.queryNum; // how far off are we?
+          console.log("remainder: " + remainder);
+          this.queryInfo.offset = newOffset - remainder;
+          
+        }
+        else
+        {
+          this.queryInfo.offset = newOffset;
+        }
+        this.getData();
+      }
+      //change rows & adjust page
+      else
+      {
+        this.createAllComicRows();
+      }
+      
+
+    });
+  }
+
+
+  createComicRow(row : any) : void
   {
  
     let ref = this.rowVcr()?.createComponent(FindComicRowComponent)
@@ -103,9 +197,11 @@ export class FindComicsComponent {
     ref?.setInput('id', row['id']);
     ref?.setInput('name', row['name']);
     ref?.setInput('desc', row['description']);
-    ref?.setInput('date', row[date_style]);
+    ref?.setInput('date', row[this.queryInfo.dateStyle]);
     ref?.setInput('imgUrl', row['image']['small_url']);
     ref?.setInput('type', this.#filterDropdownRef?.instance.getCurrentDropdownString());
+
+    this.currentResults.push(row['id']);
     
 
   }
