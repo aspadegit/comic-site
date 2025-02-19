@@ -43,8 +43,11 @@ export class PaginationComponent {
 
     this.page = newPage;
 
+    console.log("newPage : ", newPage);
+    console.log("upper: " + pageUpper + " | lower: "+ pageLower);
+
     // new page passes the boundaries
-    if(newPage >= pageUpper || newPage <= pageLower)
+    if(newPage >= pageUpper || newPage < pageOffset)
     {
       // requery
       this.updatePage.emit([true, newPage]);

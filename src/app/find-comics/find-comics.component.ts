@@ -3,11 +3,12 @@ import { NgbDropdownModule, NgbPagination, NgbPaginationModule } from '@ng-boots
 import {signal} from '@angular/core';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { FindComicRowComponent } from '../find-comic-row/find-comic-row.component';
 import { Comic, ComicJson, Dictionary, QueryInfo } from '../comic'
 import { PaginationComponent } from '../pagination/pagination.component';
+import { catchError } from 'rxjs';
 
 
 @Component({
@@ -99,25 +100,31 @@ export class FindComicsComponent {
     let apiFullUrl:string = `/api/${this.queryInfo.resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=${this.queryNum}&offset=${this.queryInfo.offset}&sort=${this.queryInfo.sort}:${direction}`;
 
     //query the api
-    this.http.get<ComicJson>(`${apiFullUrl}`, {
-      responseType: 'json',
-      observe: 'response'
-    }).pipe().subscribe( res  => {
-      if(!res.ok)
-      {
-        this.errorCode = res.status;
-        console.log(`Comic Vine ${this.errorCode} Error.`);
-        this.isError = true;
-
-        
-      }
-      else
-      {
+    try{
+      this.http.get<ComicJson>(`${apiFullUrl}`, {
+        responseType: 'json',
+        observe: 'response'
+      }).pipe().subscribe( res  => {
+        console.log(res);
         this.isError = false;
         this.cache = res.body!;
         this.createAllComicRows();
+      
+      },
+      err => {
+        this.errorCode = err.status;
+        console.log(`Comic Vine ${this.errorCode} Error.`);
+        this.isError = true;
       }
-    });
+      );
+    }
+    catch(e : any)
+    {
+      
+        console.log(`Comic Vine ${this.errorCode} Error.`);
+        this.isError = true;
+    }
+  
   }
   
   createAllComicRows() : void
@@ -179,6 +186,8 @@ export class FindComicsComponent {
 
       this.changingOffset = newOffset;
       this.page = newPage;
+
+      console.log("new offset ", newOffset);
 
       //query
       if(shouldRequery)
