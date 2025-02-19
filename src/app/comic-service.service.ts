@@ -28,6 +28,17 @@ export class ComicServiceService {
     return this.getComicsFromStorage();
   }
 
+  getComicsArray() : Comic[]
+  {
+    let dict : Dictionary<Comic> = this.getComics();
+    let returnArr : Comic[] = [];
+    for(let key in dict)
+    {
+      returnArr.push(dict[key]);
+    }
+    return returnArr;
+  }
+
   getComic(id : number) : Comic | null
   {
     return this.comicDict[id];

@@ -1,6 +1,7 @@
 import { Component, inject, viewChild, ViewContainerRef } from '@angular/core';
 import { MyComicRowComponent } from "../my-comic-row/my-comic-row.component";
 import { ComicServiceService } from '../comic-service.service';
+import { CsvConverterService } from '../csv-converter.service';
 
 @Component({
   selector: 'app-view-comics',
@@ -12,7 +13,7 @@ export class ViewComicsComponent {
 
   rowVcr = viewChild('comicRowContainer', {read: ViewContainerRef});
   
-  constructor(private comicService : ComicServiceService) {};
+  constructor(private comicService : ComicServiceService, private csvService : CsvConverterService) {};
   
   ngOnInit() : void
   {
@@ -38,6 +39,11 @@ export class ViewComicsComponent {
         ref?.destroy();
       });
     }
+  }
+
+  toSpreadsheet()
+  {
+    this.csvService.exportAsExcelFile(this.comicService.getComicsArray(), "comics");
   }
 
 }

@@ -51,7 +51,8 @@ export class MyComicRowComponent {
     {
       this.rating = comic.userRating;
       this.userNotes = comic.userDetails;
-      this.owned = comic.owned;
+      this.owned[0] = comic.ownedPhysic;
+      this.owned[1] = comic.ownedDigit;
     }
  
   }
@@ -68,7 +69,8 @@ export class MyComicRowComponent {
   {
     if(this.comic != null)
     {
-      this.comic.owned = this.owned;
+      this.comic.ownedPhysic = this.owned[0];
+      this.comic.ownedDigit = this.owned[1];
       this.comicService.updateComic(this.comicId(), this.comic);
     }
     

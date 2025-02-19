@@ -16,8 +16,8 @@ export interface Comic {
     userRating: number;
     userDetails: string;
     image: string;
-    owned: boolean[];
-
+    ownedDigit: boolean;
+    ownedPhysic : boolean;
 }
 export type Dictionary<Comic> = {
     [id: number]: Comic;
