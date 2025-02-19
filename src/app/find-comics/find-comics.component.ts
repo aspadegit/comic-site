@@ -26,6 +26,9 @@ export class FindComicsComponent {
   // for pagination
   page : number = 1;
   currentResults : number[] = [];
+  sortDirBool: boolean = true;
+  isError: boolean = false;
+  errorCode: number = 502;
 
   // changingOffset: changes around. initially is what is used to query the database, then is adjusted when pages change
   //queryInfo offset: the lower-bound offset used to query the database
@@ -64,6 +67,10 @@ export class FindComicsComponent {
     
   }
 
+  radioButtonChange()
+  {
+    this.sortDirBool = !this.sortDirBool;
+  }
  
   onClickDropdownItem(index :number) : void
   {
@@ -84,17 +91,32 @@ export class FindComicsComponent {
       this.queryInfo.sort = this.queryInfo.dateStyle;
     }
     
+    let direction = "asc";
+    if(!this.sortDirBool)
+      direction = "desc";
+
     // build API string
-    let apiFullUrl:string = `/api/${this.queryInfo.resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=${this.queryNum}&offset=${this.queryInfo.offset}&sort=${this.queryInfo.sort}:${this.queryInfo.sortDirection}`;
+    let apiFullUrl:string = `/api/${this.queryInfo.resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=${this.queryNum}&offset=${this.queryInfo.offset}&sort=${this.queryInfo.sort}:${direction}`;
 
     //query the api
     this.http.get<ComicJson>(`${apiFullUrl}`, {
       responseType: 'json',
       observe: 'response'
     }).pipe().subscribe( res  => {
-      console.log(res);
-      this.cache = res.body!;
-      this.createAllComicRows();
+      if(!res.ok)
+      {
+        this.errorCode = res.status;
+        console.log(`Comic Vine ${this.errorCode} Error.`);
+        this.isError = true;
+
+        
+      }
+      else
+      {
+        this.isError = false;
+        this.cache = res.body!;
+        this.createAllComicRows();
+      }
     });
   }
   
@@ -142,8 +164,6 @@ export class FindComicsComponent {
       let pageDiff = newPage - this.page;
       let newOffset : number = this.changingOffset + (this.queryInfo.limit * pageDiff);
 
-      console.log("new Page: " + newPage);
-      console.log("new offset: " + newOffset);
 
       // clamp upper bound
       if(newOffset > this.cache.number_of_total_results)
@@ -168,7 +188,6 @@ export class FindComicsComponent {
         if(newOffset % this.queryNum != 0)
         {
           let remainder = newOffset % this.queryNum; // how far off are we?
-          console.log("remainder: " + remainder);
           this.queryInfo.offset = newOffset - remainder;
           
         }

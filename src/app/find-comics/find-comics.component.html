@@ -2,7 +2,7 @@
 <div class="container">
     <h1>Find Comics</h1>
     <div class="row align-items-end m-3">
-        <div class="col">
+        <div class="col-5">
             <p class="m-0">Keywords</p>
             <input type="text" class="form-control" placeholder="e.g. Batman" [(ngModel)]="comicQuery">
 
@@ -19,13 +19,32 @@
             </ng-template>
         </div>
 
-        <div class="col-3">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" [checked]="true" (change)="radioButtonChange()">
+                <label class="form-check-label" for="flexRadioDefault1">
+                  Ascending
+                </label>
+              </div>
+              <!---->
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2"  (change)="radioButtonChange()">
+                <label class="form-check-label" for="flexRadioDefault2">
+                  Descending
+                </label>
+              </div>
+        </div>
+      
+
+        <div class="mt-1 w-100">
             <button type="button" (click)="getData()" class="btn btn-primary h-25">Search!</button>
 
         </div>
 
     </div>
-   
+    <div class="alert alert-danger invisible" [class.invisible]="!isError" role="alert">
+      <b>{{errorCode}} Error:</b> Unable to reach Comic Vine. Please check the status of it by visiting <a href="https://comicvine.gamespot.com/">here.</a>
+    </div>
     <ng-template #comicRowContainer></ng-template>
  
 </div>
