@@ -28,6 +28,19 @@ export class ComicServiceService {
     return this.getComicsFromStorage();
   }
 
+  // converts comic array to comic dict & sets it in storage
+  setComics(comics : Comic[]) : void
+  {
+    let dict : Dictionary<Comic> = {};
+    for(let i = 0; i < comics.length; i++)
+    {
+      dict[comics[i].id] = comics[i];
+
+    }
+    this.comicDict = dict;
+    this.setComicsToStorage();
+  }
+
   getComicsArray() : Comic[]
   {
     let dict : Dictionary<Comic> = this.getComics();

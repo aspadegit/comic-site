@@ -2,6 +2,7 @@ import { Component, inject, viewChild, ViewContainerRef } from '@angular/core';
 import { MyComicRowComponent } from "../my-comic-row/my-comic-row.component";
 import { ComicServiceService } from '../comic-service.service';
 import { CsvConverterService } from '../csv-converter.service';
+import { Comic } from '../comic';
 
 @Component({
   selector: 'app-view-comics',
@@ -22,6 +23,7 @@ export class ViewComicsComponent {
     this.showComics();
   }
 
+
   showComics() : void 
   {
     // clear the rows
@@ -38,6 +40,8 @@ export class ViewComicsComponent {
       ref?.instance.delete.subscribe(() => {
         ref?.destroy();
       });
+
+      ref?.instance.cd.detectChanges(); 
     }
   }
 
@@ -46,4 +50,20 @@ export class ViewComicsComponent {
     this.csvService.exportAsExcelFile(this.comicService.getComicsArray(), "comics");
   }
 
+  loadSpreadsheet(event : any)
+  {
+    if(event.target.files.length > 0)
+    {
+      let file = event.target.files[0];
+      this.csvService.importFileAsJson(file, this.updateComicsFromLoad);
+      
+    }
+  }
+
+  updateComicsFromLoad(json : Comic[], comicS : ComicServiceService)
+  {
+    comicS.setComics(json);
+    location.reload();
+
+  }
 }

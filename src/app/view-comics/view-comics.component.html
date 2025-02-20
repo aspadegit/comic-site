@@ -1,9 +1,17 @@
 
 <div class="container">
     <h1>My Comics</h1>
-    <div>
-        <button class="btn btn-primary m-2" (click)="toSpreadsheet()">Convert to Spreadsheet</button>
-        <button class="btn btn-primary">Load from CSV</button>
+    <div class="row">
+        <div class="col">
+            <button class="btn btn-primary m-2" (click)="toSpreadsheet()">Save to Spreadsheet</button>
+        </div>
+        <input type="file" #fileUpload class="col invisible file-upload" accept=".xlsx" (change)="loadSpreadsheet($event)">
+        <div class="file-upload col">
+             <button class="btn btn-primary m-2"
+               (click)="fileUpload.click()">
+                 Load from Spreadsheet
+             </button>
+         </div>
     </div>
     
     <div class="container">

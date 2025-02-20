@@ -1,4 +1,4 @@
-import { Component, inject, input, output, TemplateRef } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, input, output, TemplateRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbDropdownModule, NgbRatingModule, NgbCollapseModule, NgbModalModule, NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Comic } from '../comic';
@@ -13,7 +13,7 @@ import { ComicServiceService } from '../comic-service.service';
 })
 export class MyComicRowComponent {
 
-  constructor(private comicService : ComicServiceService) {};
+  constructor(private comicService : ComicServiceService, public cd: ChangeDetectorRef) {};
   
   comicId = input(0);
   rating = 0;
