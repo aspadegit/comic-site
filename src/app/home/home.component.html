@@ -2,7 +2,17 @@
     <div class="container-fluid">
       <div class="row">
         <h1 class="text-center">Welcome to Comic Collector!</h1>
-        <ngb-alert class="invisible" [class.invisible]="!apiSuccess" [type]='"success"'>API key added successfully</ngb-alert>
+        @if(apiLength > 0)
+        {
+          <ngb-alert #alert class="invisible" [class.invisible]="!apiConfirm" [type]='"success"'> API Key added successfully.</ngb-alert>
+
+        }
+        @else {
+          <ngb-alert #alert class="invisible" [class.invisible]="!apiConfirm" [type]='"danger"'>There was an error adding your API key. Please try again.</ngb-alert>
+
+        }
+  
+
       </div>
     
         <div class="row justify-content-md-center">

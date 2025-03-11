@@ -4,12 +4,12 @@ import { isPlatformServer } from '@angular/common';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
-import { LOCAL_STORAGE } from './tokens';
+import { SESSION_STORAGE } from './tokens';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     {
-      provide: LOCAL_STORAGE,
+      provide: SESSION_STORAGE,
       useFactory:(platformId: object) => {
         if (isPlatformServer(platformId)) {
           return {}; // Return an empty object on the server

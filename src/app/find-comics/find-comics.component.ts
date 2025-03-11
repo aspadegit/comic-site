@@ -1,14 +1,14 @@
-import { Component, OnInit, Signal, viewChild, ViewContainerRef, WritableSignal, ComponentRef, Injectable, ViewChild, ElementRef } from '@angular/core';
-import { NgbDropdownModule, NgbPagination, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { Component, viewChild, ViewContainerRef, WritableSignal, ComponentRef, Injectable, inject } from '@angular/core';
+import { NgbDropdownModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import {signal} from '@angular/core';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { FindComicRowComponent } from '../find-comic-row/find-comic-row.component';
-import { Comic, ComicJson, Dictionary, QueryInfo } from '../comic'
+import {  ComicJson, QueryInfo } from '../comic'
 import { PaginationComponent } from '../pagination/pagination.component';
-import { catchError } from 'rxjs';
+import { SESSION_STORAGE } from '../tokens';
 
 
 @Component({
@@ -21,6 +21,9 @@ import { catchError } from 'rxjs';
 @Injectable({providedIn: 'root'})
 export class FindComicsComponent {
 
+  private storage = inject(SESSION_STORAGE);
+
+  // input / changing values
   comicQuery = '';
   curDropdownSelection : WritableSignal<number> = signal(0);
   
@@ -58,6 +61,7 @@ export class FindComicsComponent {
 
     this.#sortDropdownRef = this.sortVcr()?.createComponent(DropdownComponent);
     this.setupDropdownComponent(this.#sortDropdownRef, ['Name', 'Date'], "Sort By");
+
     
   }
 
@@ -97,7 +101,7 @@ export class FindComicsComponent {
       direction = "desc";
 
     // build API string
-    let apiFullUrl:string = `/api/${this.queryInfo.resource}s/?api_key=${environment.apiKey}&format=json&filter=name:${this.comicQuery}&limit=${this.queryNum}&offset=${this.queryInfo.offset}&sort=${this.queryInfo.sort}:${direction}`;
+    let apiFullUrl:string = `/api/${this.queryInfo.resource}s/?api_key=${this.storage.getItem("apiKey")}&format=json&filter=name:${this.comicQuery}&limit=${this.queryNum}&offset=${this.queryInfo.offset}&sort=${this.queryInfo.sort}:${direction}`;
 
     //query the api
     try{

@@ -33,18 +33,18 @@
 
         <div>
             <p>Enter your ComicVine API key here:</p>
-            <input>
-        
+            <input [(ngModel)]="apiEntry">
             <br>
             <br>
-            <br>
+            <p>(This will be deleted each browser session)</p>
+            
         </div>
        <div>
        </div>
     </div>
     <div class="modal-footer">
         <div class="text-center w-100">
-            <button (click)="activeModal.close('submit api')" class="btn btn-primary me-5">Submit Key</button>
+            <button (click)='activeModal.close(apiEntry)' class="btn btn-primary me-5">Submit Key</button>
             <button type="button" class="btn btn-danger ms-5" (click)="changePage(false)">I Don't Have a Key</button>
         
         </div>

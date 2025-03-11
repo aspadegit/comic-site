@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Comic } from './comic';
 import { Dictionary } from './comic'; // not a true Dictionary; just for returning type <int, Comic>
 import { inject } from '@angular/core';
-import { LOCAL_STORAGE } from './tokens';
+import { SESSION_STORAGE } from './tokens';
 import { relative } from 'path/posix';
 
 @Injectable({
@@ -15,7 +15,7 @@ import { relative } from 'path/posix';
 export class ComicServiceService {
 
   private comicDict : Dictionary<Comic>;
-  private storage = inject(LOCAL_STORAGE);
+  private storage = inject(SESSION_STORAGE);
 
   constructor() {
     
