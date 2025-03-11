@@ -2,7 +2,7 @@
     <div class="container-fluid">
       <div class="row">
         <h1 class="text-center">Welcome to Comic Collector!</h1>
-
+        <ngb-alert class="invisible" [class.invisible]="!apiSuccess" [type]='"success"'>API key added successfully</ngb-alert>
       </div>
     
         <div class="row justify-content-md-center">
@@ -16,6 +16,14 @@
                 <button type="button" (click)="buttonClick('/my-comics')" class="btn btn-primary">Go</button>
 
             </div>
+            
+            <div class="col text-center">
+                <p >Need to update your API key?</p>
+                <button type="button" (click)="open()" class="btn btn-primary">Launch Setup</button>
+
+            </div>
+
         </div>
       </div>
+
 </div>

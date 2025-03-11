@@ -1,0 +1,78 @@
+<!-- Confirmation Modal -->
+<ng-template #continueConfirmation let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title">Continue Without a Key?</h4>
+		<button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+	<div class="modal-body">
+		<form>
+			<div class="mb-3">
+            <p>Without an API key, you will be unable to access most of the features of this app.</p>
+            <p>Are you certain you wish to proceed?</p>
+				
+			</div>
+		</form>
+	</div>
+	<div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="modal.close()">Yes</button>
+
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">Go Back</button>
+</div>
+</ng-template>
+
+
+<!-- Main Modal -->
+
+<div class="modal-header">
+    <h4 class="modal-title">Initial Setup</h4>
+</div>
+
+<!-- PAGE ONE (entering API key) -->
+<div #pageOne class="d-block">
+    <div class="modal-body text-center">
+
+        <div>
+            <p>Enter your ComicVine API key here:</p>
+            <input>
+        
+            <br>
+            <br>
+            <br>
+        </div>
+       <div>
+       </div>
+    </div>
+    <div class="modal-footer">
+        <div class="text-center w-100">
+            <button (click)="activeModal.close('submit api')" class="btn btn-primary me-5">Submit Key</button>
+            <button type="button" class="btn btn-danger ms-5" (click)="changePage(false)">I Don't Have a Key</button>
+        
+        </div>
+    </div>
+    
+</div>
+
+<!-- PAGE TWO (instructions for api key) -->
+<div #pageTwo class="d-none">
+    <div class="modal-body">
+        <p>To get an API key:</p>
+        <ul>
+            <li>
+                <p>Go to Comic Vine's website and <a href="https://comicvine.gamespot.com/login-signup/">create an account.</a></p>
+            </li>
+            <li>
+                <p>Once you've created an account, go to the <a href="https://comicvine.gamespot.com/api/">API page</a> to view your API key.</p>
+            </li>
+            <li>
+                <p>Click the blue button below to enter your newly acquired API key.</p>
+            </li>
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <div class="text-center w-100">
+            <button (click)="changePage(true)" class="btn btn-primary me-5">I Have an API Key</button>
+            <button type="button" class="btn btn-danger ms-5" (click)="open(continueConfirmation)">Continue with No Key</button>
+        
+        </div>
+    </div>
+</div>
